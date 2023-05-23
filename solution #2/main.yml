@@ -1,0 +1,39 @@
+- hosts: all
+  tasks:
+  - name: Disable SELinux
+    selinux:
+      state: disabled
+    when: ansible_os_family == 'RedHat'
+
+  - name: install  Apache 
+    package:
+      name: "{{ package_name }}"
+      state: latest
+
+  - name: Make sure a service is running
+    systemd:
+      state: started
+      enabled: yes 
+      name: "{{ service_name }}"
+
+  - name: download template 
+    get_url:
+      url: https://www.free-css.com/assets/files/free-css-templates/download/page242/business-perfect.zip
+      dest: /var/business-perfect.zip
+   
+  - name: install Unzip
+    package:
+      name: unzip
+      state: latest
+  
+  - name: Unarchive a file that needs to be downloaded
+    unarchive:
+      src: https://www.free-css.com/assets/files/free-css-templates/download/page242/business-perfect.zip
+      dest: /var/www/html
+      remote_src: yes
+
+  - name: Move templates files to var/www/html
+    shell: "mv /tmp/html-freebie-business-perfect-master/* /var/www/html/"
+    args:
+      creates: /var/www/html/index.html
+      
